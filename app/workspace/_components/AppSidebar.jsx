@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem, // <--- ADDED: This was the missing import for SidebarMenuItem
+  SidebarMenuItem, 
 } from "@/components/ui/sidebar";
 import {
   BookAIcon,
@@ -69,9 +69,9 @@ const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {SideBarOptions.map((item, index) => (
-                // Changed <SidebarMenu.Item> to <SidebarMenuItem> as per your component's export
+               
                 <SidebarMenuItem
-                  key={index} // Keeping index as key as requested
+                  key={index} 
                 >
                   <SidebarMenuButton asChild>
                     <Link href={item.path}>
