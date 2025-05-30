@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
+import Link from "next/link";
 
 import {
   Sidebar,
@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem, 
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
   BookAIcon,
@@ -21,7 +21,7 @@ import {
   UserCircle2Icon,
   WalletCardsIcon,
 } from "lucide-react";
-
+import AddNewCourseDialog from "./AddNewCourseDialog"; // Assuming this path is correct based on the image
 
 const SideBarOptions = [
   {
@@ -62,20 +62,17 @@ const AppSidebar = () => {
       <SidebarHeader />
       <SidebarContent>
         <SidebarGroup>
-          <Button>Create new course</Button>
+          {/* FIX IS HERE: Ensure no whitespace/newlines between tags */}
+          <AddNewCourseDialog><Button>Create new course</Button></AddNewCourseDialog>
         </SidebarGroup>
 
-        <SidebarGroup >
+        <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {SideBarOptions.map((item, index) => (
-               
-                <SidebarMenuItem
-                  key={index} 
-                >
+                <SidebarMenuItem key={index}>
                   <SidebarMenuButton asChild>
                     <Link href={item.path}>
-                      {/* Added className for basic styling of the icon */}
                       <item.icon className="mr-2 h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -85,7 +82,6 @@ const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>

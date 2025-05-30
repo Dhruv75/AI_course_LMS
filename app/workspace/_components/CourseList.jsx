@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
+import AddNewCourseDialog from "./AddNewCourseDialog";
 
 const CourseList = () => {
   const [courseList, setCourseList] = useState([]);
@@ -15,7 +16,8 @@ const CourseList = () => {
             <p className="text-base text-gray-500">
               It looks like you haven't added any courses yet.
             </p>
-            <Button className="mt-2">+ Create course </Button>
+            <AddNewCourseDialog>
+            <Button className="mt-2">+ Create course </Button></AddNewCourseDialog>
           </div>
         ) : (
           <div className="p-4">
