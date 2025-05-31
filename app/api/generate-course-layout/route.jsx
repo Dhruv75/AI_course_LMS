@@ -3,12 +3,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/config/db";
-import {  usersTable } from "@/config/schema";
+import { usersTable } from "@/config/schema"; // Although not used, keep for context
 
 export async function POST(req) {
   const formData = await req.json();
   const user = await currentUser();
-  
+
   // Check if user is authenticated
   if (!user) {
     return NextResponse.json(
@@ -63,7 +63,7 @@ Schema:
     );
     const response = await result.response;
     const geminiTextResponse = response.text();
-    
+
     console.log("Response from Gemini:", geminiTextResponse);
 
     // Clean and parse JSON response
@@ -80,7 +80,7 @@ Schema:
           .replace(/^```\n/, "")
           .replace(/\n```$/, "");
       }
-      
+
       parsedResponse = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.warn("Response is not valid JSON:", parseError);
@@ -95,10 +95,13 @@ Schema:
       return 'course_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     };
 
+    // Store the generated CID in a variable
+    const newCourseCid = generateCourseId(); // Store the generated CID
+
     // Save to database
     try {
       const dbResult = await db.insert(coursesTable).values({
-        cid: generateCourseId(), // Required unique course ID
+        cid: newCourseCid, // Use the stored CID
         name: parsedResponse.course.name,
         description: parsedResponse.course.description,
         category: parsedResponse.course.category,
@@ -111,21 +114,24 @@ Schema:
 
       console.log("Course saved to database:", dbResult);
 
-      // Return success response with both the generated course and database ID
+      // Return success response with the generated course ID
       return NextResponse.json({
         success: true,
         course: parsedResponse.course,
+        cid: newCourseCid, // <-- Add the generated CID here
         dbResult: dbResult,
         message: "Course generated and saved successfully"
       });
 
     } catch (dbError) {
       console.error("Database save error:", dbError);
-      
-      // Return the generated course even if DB save fails
+
+      // Return the generated course and the generated CID even if DB save fails
+      // This allows the frontend to still try navigating if the CID is available.
       return NextResponse.json({
         success: true,
         course: parsedResponse.course,
+        cid: newCourseCid, // <-- Add the generated CID here as a fallback
         warning: "Course generated but failed to save to database",
         dbError: dbError.message
       });

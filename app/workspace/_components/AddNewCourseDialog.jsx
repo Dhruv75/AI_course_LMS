@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, SparkleIcon } from "lucide-react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const AddNewCourseDialog = ({ children }) => {
+  // Move useRouter inside the component
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -45,11 +49,12 @@ const AddNewCourseDialog = ({ children }) => {
     setLoading(true);
     console.log("Generating course with data: ", formData);
     const result = await axios.post("/api/generate-course-layout", {
-      ...formData } );
+      ...formData,
+    });
 
-      console.log("Generated Course Data: ", result.data);
+    console.log("Generated Course Data: ", result.data);
     setLoading(false);
-   
+    router.push(`/workspace/edit-course/${result.data.cid}`);
   };
 
   React.useEffect(() => {
@@ -175,13 +180,17 @@ const AddNewCourseDialog = ({ children }) => {
                 />
               </div>
 
-              <Button className="w-full mt-4" onClick={onGenerate} disabled={loading}>
-                {loading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> :<SparkleIcon className="mr-2 h-4 w-4" /> }
-
-
-                 Generate Course
-
-
+              <Button
+                className="w-full mt-4"
+                onClick={onGenerate}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <SparkleIcon className="mr-2 h-4 w-4" />
+                )}
+                Generate Course
               </Button>
             </div>
           </DialogDescription>
