@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { SparkleIcon } from "lucide-react";
+import { Loader2Icon, SparkleIcon } from "lucide-react";
+import axios from "axios";
 
 const AddNewCourseDialog = ({ children }) => {
   const [formData, setFormData] = useState({
@@ -31,6 +32,8 @@ const AddNewCourseDialog = ({ children }) => {
     level: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const onHandleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -38,11 +41,15 @@ const AddNewCourseDialog = ({ children }) => {
     }));
   };
 
-  const onGenerate = () => {
+  const onGenerate = async () => {
+    setLoading(true);
     console.log("Generating course with data: ", formData);
-    // You would typically send this formData to an API here
-    // e.g., using fetch or axios, then handle success/error,
-    // and close the dialog.
+    const result = await axios.post("/api/generate-course-layout", {
+      ...formData } );
+
+      console.log("Generated Course Data: ", result.data);
+    setLoading(false);
+   
   };
 
   React.useEffect(() => {
@@ -168,8 +175,13 @@ const AddNewCourseDialog = ({ children }) => {
                 />
               </div>
 
-              <Button className="w-full mt-4" onClick={onGenerate}>
-                <SparkleIcon className="mr-2 h-4 w-4" /> Generate Course
+              <Button className="w-full mt-4" onClick={onGenerate} disabled={loading}>
+                {loading ? <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> :<SparkleIcon className="mr-2 h-4 w-4" /> }
+
+
+                 Generate Course
+
+
               </Button>
             </div>
           </DialogDescription>
