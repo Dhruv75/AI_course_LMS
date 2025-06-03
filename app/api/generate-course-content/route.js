@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { db } from "@/config/db"; // Import your database connection
+import { coursesTable } from "@/config/schema"; // Import your schema
+import { eq } from "drizzle-orm";
 
 export async function POST(req) {
   const { course, courseTitle, courseId } = await req.json();
@@ -148,6 +151,64 @@ User Input:`;
       total: generatedChapters.length
     });
 
+    // **NEW: Save generated content to database**
+    try {
+      // Prepare the updated course JSON with generated content
+      const updatedCourseJson = {
+        ...course,
+        chapters: chapters.map((originalChapter, index) => {
+          const generatedChapter = generatedChapters[index];
+          return {
+            ...originalChapter,
+            generatedContent: generatedChapter.topics || [],
+            contentGenerated: !generatedChapter.error,
+            generationError: generatedChapter.error || null,
+            generatedAt: new Date().toISOString()
+          };
+        }),
+        contentGenerationSummary: {
+          totalChapters: generatedChapters.length,
+          successfulChapters: successfulChapters.length,
+          failedChapters: failedChapters.length,
+          lastGenerated: new Date().toISOString()
+        }
+      };
+
+      // Update the course in the database
+      const updateResult = await db
+        .update(coursesTable)
+        .set({
+          courseJson: updatedCourseJson
+        })
+        .where(eq(coursesTable.cid, courseId))
+        .returning();
+
+      if (updateResult.length === 0) {
+        throw new Error("Course not found or update failed");
+      }
+
+      console.log("Successfully saved generated content to database");
+
+    } catch (dbError) {
+      console.error("Error saving to database:", dbError);
+      // Don't fail the entire request if DB save fails
+      // Return success with a warning
+      return NextResponse.json({
+        success: true,
+        courseId: courseId,
+        courseTitle: courseTitle,
+        chapters: generatedChapters,
+        summary: {
+          totalChapters: generatedChapters.length,
+          successfulChapters: successfulChapters.length,
+          failedChapters: failedChapters.length
+        },
+        warning: "Content generated successfully but failed to save to database",
+        dbError: dbError.message,
+        message: "Chapter content generated successfully"
+      });
+    }
+
     // Return success response
     return NextResponse.json({
       success: true,
@@ -159,7 +220,8 @@ User Input:`;
         successfulChapters: successfulChapters.length,
         failedChapters: failedChapters.length
       },
-      message: "Chapter content generated successfully"
+      saved: true,
+      message: "Chapter content generated and saved successfully"
     });
 
   } catch (error) {
