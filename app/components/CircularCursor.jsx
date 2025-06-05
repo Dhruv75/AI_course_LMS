@@ -20,8 +20,8 @@ export default function CircularCursor() {
     let xTo = gsap.quickTo(cursor, "x", { duration: 0.2, ease: "power2.out" });
     let yTo = gsap.quickTo(cursor, "y", { duration: 0.2, ease: "power2.out" });
     
-    let xFollowerTo = gsap.quickTo(follower, "x", { duration: 0.8, ease: "power2.out" });
-    let yFollowerTo = gsap.quickTo(follower, "y", { duration: 0.8, ease: "power2.out" });
+    let xFollowerTo = gsap.quickTo(follower, "x", { duration: 0.5, ease: "power2.out" });
+    let yFollowerTo = gsap.quickTo(follower, "y", { duration: 0.5, ease: "power2.out" });
 
     const handleMouseMove = (e) => {
       xTo(e.clientX);
